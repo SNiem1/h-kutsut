@@ -1,6 +1,9 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 async function startServer() {
   const app = express();
@@ -44,13 +47,13 @@ async function startServer() {
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("Web3Forms API returned error:", errorData);
-        throw new Error(`Web3Forms feedback failed with status: ${response.status}`);
+      const result = await response.json().catch(() => ({}));
+      
+      if (!response.ok || !result.success) {
+        console.error("Web3Forms API error:", result);
+        throw new Error(result.message || `Lähetys epäonnistui (virhekoodi: ${response.status})`);
       }
 
-      const result = await response.json();
       return res.json({ success: true, data: result });
     } catch (error: any) {
       console.error("RSVP backend submit error:", error);

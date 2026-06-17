@@ -18,6 +18,7 @@ export const RSVPForm: React.FC<RSVPFormProps> = ({ onAddResponse }) => {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleLactoseChange = (checked: boolean) => {
     setLactoseFree(checked);
@@ -54,6 +55,7 @@ export const RSVPForm: React.FC<RSVPFormProps> = ({ onAddResponse }) => {
     if (!name.trim()) return;
 
     setIsSubmitting(true);
+    setSubmitError(null);
 
     const newResponse: RSVPResponse = {
       id: Date.now().toString(),
@@ -68,7 +70,7 @@ export const RSVPForm: React.FC<RSVPFormProps> = ({ onAddResponse }) => {
 
     // Submission logic - calling our local full-stack backend
     try {
-      await fetch('/api/rsvp', {
+      const response = await fetch('/api/rsvp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,14 +86,16 @@ export const RSVPForm: React.FC<RSVPFormProps> = ({ onAddResponse }) => {
           timestamp: newResponse.timestamp,
         }),
       });
-    } catch (error) {
-      console.error('Palvelimen RSVP-lähetysvirhe:', error);
-    }
 
-    // Add locally to state list for review in browser
-    onAddResponse(newResponse);
+      const responseData = await response.json().catch(() => ({ success: false, error: 'Virhe tietojen käsittämisessä' }));
 
-    setTimeout(() => {
+      if (!response.ok || !responseData.success) {
+        throw new Error(responseData.error || 'Virhe tietojen lähettämisessä');
+      }
+
+      // Add locally to state list for review in browser
+      onAddResponse(newResponse);
+
       setIsSubmitting(false);
       setSubmitSuccess(true);
       
@@ -102,7 +106,11 @@ export const RSVPForm: React.FC<RSVPFormProps> = ({ onAddResponse }) => {
       setNoAllergies(false);
       setOtherAllergies('');
       setMessage('');
-    }, 1200);
+    } catch (error: any) {
+      console.error('Palvelimen RSVP-lähetysvirhe:', error);
+      setIsSubmitting(false);
+      setSubmitError(error.message || 'Tietojen lähetys epäonnistui. Ole hyvä ja yritä uudelleen.');
+    }
   };
 
   return (
@@ -254,6 +262,12 @@ export const RSVPForm: React.FC<RSVPFormProps> = ({ onAddResponse }) => {
                 className="w-full rounded-xl px-4 py-3 font-sans text-xs text-stone-800 placeholder-stone-400 focus:outline-none transition-smooth glass-input h-16 resize-none"
               />
             </div>
+
+            {submitError && (
+              <div id="rsvp-submit-error" className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl font-sans text-center">
+                {submitError}
+              </div>
+            )}
 
             {/* Submit button with spinner and state loading */}
             <button
