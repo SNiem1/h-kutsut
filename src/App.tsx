@@ -76,13 +76,13 @@ export default function App() {
 
   // Dynamic text customization (allows couple to personalize live without coding!)
   const [weddingNames, setWeddingNames] = useState(() => {
-    return localStorage.getItem('wedding_names') || 'Samu & Aino';
+    return localStorage.getItem('wedding_names') || 'Aino & Samu';
   });
   const [weddingDate, setWeddingDate] = useState(() => {
     return localStorage.getItem('wedding_date') || '15. elokuuta 2026';
   });
   const [weddingVenue, setWeddingVenue] = useState(() => {
-    return localStorage.getItem('wedding_venue') || 'Tenalji von Fersen, Suomenlinna, Helsinki';
+    return localStorage.getItem('wedding_venue') || 'Tanhuanpään tila, Renko';
   });
 
   // Sync to localStorage
