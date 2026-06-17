@@ -145,17 +145,6 @@ export const RSVPForm: React.FC<RSVPFormProps> = ({ onAddResponse, web3FormsConf
               <p className="font-sans text-[11px] text-[#8E9C7F] font-semibold mt-1.5 leading-relaxed italic max-w-xs mx-auto">
                 * Ilmoittakaa tiedot henkilökohtaisesti, jotta saamme tarkat määrät.
               </p>
-              {web3FormsConfig.accessKey ? (
-                <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-sans font-medium text-emerald-800 border border-emerald-100/60 select-none">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Yhdistetty sähköpostiin (Web3Forms)
-                </div>
-              ) : (
-                <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-[#FAF9F5] px-2.5 py-0.5 text-[10px] font-sans font-medium text-stone-500 border border-stone-200/40 select-none">
-                  <span className="h-1.5 w-1.5 rounded-full bg-stone-300" />
-                  Käytetään testitilaa (vastaukset tallentuvat vain selaimen muistiin)
-                </div>
-              )}
             </div>
 
             {/* Guest Name input with smooth focus boundary transition */}
@@ -170,7 +159,7 @@ export const RSVPForm: React.FC<RSVPFormProps> = ({ onAddResponse, web3FormsConf
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Esim. Sofia tai Elias"
+                placeholder=""
                 className="w-full rounded-xl px-4 py-3 font-sans text-xs text-stone-800 placeholder-stone-400 glass-input"
               />
             </div>
@@ -252,7 +241,7 @@ export const RSVPForm: React.FC<RSVPFormProps> = ({ onAddResponse, web3FormsConf
                   rows={2}
                   value={otherAllergies}
                   onChange={(e) => handleOtherAllergiesChange(e.target.value)}
-                  placeholder="Laadi tähän esim. pähkinäallergia, vegaani jne."
+                  placeholder=""
                   className="w-full rounded-xl px-3 py-2 text-xs font-sans text-stone-800 placeholder-stone-400 focus:outline-none transition-smooth glass-input h-20 resize-none"
                 />
               </div>
@@ -269,7 +258,7 @@ export const RSVPForm: React.FC<RSVPFormProps> = ({ onAddResponse, web3FormsConf
                 rows={2}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Lämmin tervehdys tulevalle avioparille..."
+                placeholder=""
                 className="w-full rounded-xl px-4 py-3 font-sans text-xs text-stone-800 placeholder-stone-400 focus:outline-none transition-smooth glass-input h-16 resize-none"
               />
             </div>
