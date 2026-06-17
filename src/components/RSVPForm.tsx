@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
-import { RSVPResponse, Web3FormsConfig } from '../types';
+import { RSVPResponse } from '../types';
 import { TulipSingle } from './TulipSVG';
 import { Heart, Send, Check, HeartCrack } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface RSVPFormProps {
   onAddResponse: (response: RSVPResponse) => void;
-  web3FormsConfig: Web3FormsConfig;
 }
 
-export const RSVPForm: React.FC<RSVPFormProps> = ({ onAddResponse, web3FormsConfig }) => {
+export const RSVPForm: React.FC<RSVPFormProps> = ({ onAddResponse }) => {
   const [name, setName] = useState('');
   const [lactoseFree, setLactoseFree] = useState(false);
   const [glutenFree, setGlutenFree] = useState(false);
@@ -67,33 +66,26 @@ export const RSVPForm: React.FC<RSVPFormProps> = ({ onAddResponse, web3FormsConf
       timestamp: new Date().toLocaleString('fi-FI'),
     };
 
-    // Submission logic
-    if (web3FormsConfig && web3FormsConfig.accessKey) {
-      try {
-        await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: JSON.stringify({
-            access_key: web3FormsConfig.accessKey,
-            subject: `Uusi hääilmoittautuminen: ${newResponse.name}`,
-            from_name: 'Hääkutsu RSVP',
-            Nimi: newResponse.name,
-            Laktoositon: newResponse.lactoseFree ? 'Kyllä' : 'Ei',
-            Gluteeniton: newResponse.glutenFree ? 'Kyllä' : 'Ei',
-            'Ei allergioita': newResponse.noAllergies ? 'Kyllä' : 'Ei',
-            'Muut allergiat/ruokavaliot': newResponse.otherAllergies || '-',
-            Terveiset: newResponse.message || '-',
-            Aikaleima: newResponse.timestamp,
-          }),
-        });
-      } catch (error) {
-        console.error('Web3Forms submit error:', error);
-      }
-    } else {
-      console.log('Huom: Web3Forms access key puuttuu. Vastaukset tallentuvat vain paikallisesti selaimeen esittelyä varten.');
+    // Submission logic - calling our local full-stack backend
+    try {
+      await fetch('/api/rsvp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          name: newResponse.name,
+          lactoseFree: newResponse.lactoseFree,
+          glutenFree: newResponse.glutenFree,
+          noAllergies: newResponse.noAllergies,
+          otherAllergies: newResponse.otherAllergies,
+          message: newResponse.message,
+          timestamp: newResponse.timestamp,
+        }),
+      });
+    } catch (error) {
+      console.error('Palvelimen RSVP-lähetysvirhe:', error);
     }
 
     // Add locally to state list for review in browser

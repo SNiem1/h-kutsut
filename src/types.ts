@@ -9,10 +9,6 @@ export interface RSVPResponse {
   timestamp: string;
 }
 
-export interface Web3FormsConfig {
-  accessKey: string; // e.g. 1234abcd-1234-abcd-1234-abcd1234abcd
-}
-
 export interface CustomizableImage {
   id: string;
   label: string;

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { RSVPResponse, Web3FormsConfig } from './types';
+import { RSVPResponse } from './types';
 import { TulipSingle, TulipDivider, TulipCorner } from './components/TulipSVG';
 import { ImagePlaceholder } from './components/ImagePlaceholder';
 import { RSVPForm } from './components/RSVPForm';
-import { FormConfiguration } from './components/FormConfiguration';
 import { 
   Heart, 
   MapPin, 
@@ -36,22 +35,6 @@ export default function App() {
   const [guestResponses, setGuestResponses] = useState<RSVPResponse[]>(() => {
     const saved = localStorage.getItem('wedding_rsvp_responses');
     return saved ? JSON.parse(saved) : [];
-  });
-
-  const [web3FormsConfig, setWeb3FormsConfig] = useState<Web3FormsConfig>(() => {
-    const saved = localStorage.getItem('wedding_web3forms_config');
-    const defaultConfig = {
-      accessKey: '',
-    };
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        return { ...defaultConfig, ...parsed };
-      } catch (e) {
-        return defaultConfig;
-      }
-    }
-    return defaultConfig;
   });
 
   const [customImages, setCustomImages] = useState<Record<string, string>>(() => {
@@ -97,10 +80,6 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('wedding_rsvp_responses', JSON.stringify(guestResponses));
   }, [guestResponses]);
-
-  useEffect(() => {
-    localStorage.setItem('wedding_web3forms_config', JSON.stringify(web3FormsConfig));
-  }, [web3FormsConfig]);
 
   useEffect(() => {
     localStorage.setItem('wedding_custom_images', JSON.stringify(customImages));
@@ -310,8 +289,7 @@ export default function App() {
 
               {/* THE WEDDING RESPONSIVE RSVP SECTION */}
               <div id="guest-rsvp-section" className="max-w-xl mx-auto border-t border-sage/10 pt-4 space-y-6">
-                <RSVPForm onAddResponse={handleAddResponse} web3FormsConfig={web3FormsConfig} />
-                {isAdmin && <FormConfiguration config={web3FormsConfig} onSaveConfig={setWeb3FormsConfig} />}
+                <RSVPForm onAddResponse={handleAddResponse} />
               </div>
 
             </motion.div>
