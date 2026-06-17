@@ -1,0 +1,6 @@
+{
+  "name": "Hääkutsu ja RSVP",
+  "description": "Tyylikäs hääkutsu-verkkosivu ja ilmoittautumislomake kauniilla tulppaaniaiheisella teemalla.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

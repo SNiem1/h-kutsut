@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Parisienne&family=Pinyon+Script&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-gold-cream: #FDF7CA;
+  --color-sage: #C3CFB5;
+  --color-ivory: #FFFEF4;
+  --color-sage-dark: #8E9C7F;
+  --color-sage-light: #E1E8DB;
+  
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-script: 'Parisienne', cursive;
+  --font-handwritten: 'Caveat', cursive;
+  --font-sans: 'Inter', sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-ivory);
+    color: #2F3E32; /* Soft charcoal-forest color instead of pure black for a warmer, organic feel */
+    font-family: var(--font-sans);
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(253, 247, 202, 0.3) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(195, 207, 181, 0.25) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+}
+
+/* Frosted glass utility styling */
+.glass-panel {
+  background: rgba(255, 254, 244, 0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 10px 30px -10px rgba(110, 125, 95, 0.15);
+}
+
+.glass-panel-heavy {
+  background: rgba(255, 254, 244, 0.65);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 15px 35px -12px rgba(110, 125, 95, 0.18);
+}
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(195, 207, 181, 0.61);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: #8E9C7F;
+  box-shadow: 0 0 0 3px rgba(195, 207, 181, 0.35);
+}
+
+/* Custom fade-in and smooth animations */
+.transition-smooth {
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Tulip elements pulse/float subtly */
+@keyframes delicateFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-float {
+  animation: delicateFloat 6s ease-in-out infinite;
+}
+
