@@ -76,13 +76,21 @@ export default function App() {
 
   // Dynamic text customization (allows couple to personalize live without coding!)
   const [weddingNames, setWeddingNames] = useState(() => {
-    return localStorage.getItem('wedding_names') || 'Aino & Samu';
+    const saved = localStorage.getItem('wedding_names');
+    if (!saved || saved === 'Samu & Aino') {
+      return 'Aino & Samu';
+    }
+    return saved;
   });
   const [weddingDate, setWeddingDate] = useState(() => {
     return localStorage.getItem('wedding_date') || '15. elokuuta 2026';
   });
   const [weddingVenue, setWeddingVenue] = useState(() => {
-    return localStorage.getItem('wedding_venue') || 'Tanhuanpään tila, Renko';
+    const saved = localStorage.getItem('wedding_venue');
+    if (!saved || saved === 'Tanhuanpään tila, Renko' || saved === 'Tenalji von Fersen, Suomenlinna, Helsinki' || saved === 'Tanhuanpään tila, Vehmaistentie 855, 14300 Hämeenlinna') {
+      return 'Vehmaistentie 855, 14300 Hämeenlinna';
+    }
+    return saved;
   });
 
   // Sync to localStorage
@@ -224,8 +232,7 @@ export default function App() {
                         <span className="absolute -left-[27px] top-1.5 h-3 w-3 rounded-full bg-[#FDF7CA] border-2 border-white ring-2 ring-gold-cream/40" />
                         <h4 className="font-serif text-sm font-bold text-stone-850 mt-0.5">Osoite</h4>
                         <div className="text-stone-500 mt-1 space-y-1 leading-relaxed">
-                          <p className="text-stone-700">Tanhuanpään tila</p>
-                          <p>Juhlat järjestetään Rengossa vanhassa ladossa osoitteessa Vehmaistentie 855, 14300 Hämeenlinna.</p>
+                          <p className="text-stone-700">{weddingVenue}</p>
                         </div>
                       </div>
 
