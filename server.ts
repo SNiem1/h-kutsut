@@ -2,8 +2,33 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
+import fs from "fs";
 
 dotenv.config();
+
+const RSVPS_FILE = path.join(process.cwd(), "rsvps.json");
+
+// Helper to read RSVPs from local file
+function readRSVPs(): any[] {
+  try {
+    if (fs.existsSync(RSVPS_FILE)) {
+      const data = fs.readFileSync(RSVPS_FILE, "utf-8");
+      return JSON.parse(data);
+    }
+  } catch (e) {
+    console.error("Error reading RSVPs file from disk:", e);
+  }
+  return [];
+}
+
+// Helper to write RSVPs to local file
+function writeRSVPs(rsvps: any[]) {
+  try {
+    fs.writeFileSync(RSVPS_FILE, JSON.stringify(rsvps, null, 2), "utf-8");
+  } catch (e) {
+    console.error("Error writing RSVPs file to disk:", e);
+  }
+}
 
 async function startServer() {
   const app = express();
@@ -13,7 +38,20 @@ async function startServer() {
   app.use(express.json());
 
   // API endpoints FIRST
-  app.post("/api/rsvp", async (req, res) => {
+
+  // Retrieve all saved RSVPs from the backend file (enables synchronization/backup)
+  app.get("/api/rsvps", (req, res) => {
+    try {
+      const rsvps = readRSVPs();
+      return res.json({ success: true, data: rsvps });
+    } catch (error: any) {
+      console.error("Error retrieving RSVPs:", error);
+      return res.status(500).json({ success: false, error: "Virhe tietojen hakemisessa" });
+    }
+  });
+
+  // Save/Append a new RSVP response to the backend file
+  app.post("/api/rsvp", (req, res) => {
     try {
       const { name, lactoseFree, glutenFree, noAllergies, otherAllergies, message, timestamp } = req.body;
 
@@ -21,42 +59,28 @@ async function startServer() {
         return res.status(400).json({ success: false, error: "Nimi on pakollinen kenttä" });
       }
 
-      // Hardcode the Web3Forms secret submission key on the backend
-      const web3FormsKey = "c5fdcf9b-0742-42c8-b00e-a0f777247eea";
+      const rsvps = readRSVPs();
 
-      const payload = {
-        access_key: web3FormsKey,
-        subject: `Uusi hääilmoittautuminen: ${name}`,
-        from_name: 'Hääkutsu RSVP',
-        Nimi: name,
-        Laktoositon: lactoseFree ? 'Kyllä' : 'Ei',
-        Gluteeniton: glutenFree ? 'Kyllä' : 'Ei',
-        'Ei allergioita': noAllergies ? 'Kyllä' : 'Ei',
-        'Muut allergiat/ruokavaliot': otherAllergies || '-',
-        Terveiset: message || '-',
-        Aikaleima: timestamp || new Date().toLocaleString('fi-FI'),
+      // Create new response object
+      const rsvpId = Date.now().toString() + "-" + Math.random().toString(36).substr(2, 4);
+      const newRsvp = {
+        id: rsvpId,
+        name: name.trim(),
+        lactoseFree: !!lactoseFree,
+        glutenFree: !!glutenFree,
+        noAllergies: !!noAllergies,
+        otherAllergies: (otherAllergies || "").trim(),
+        message: (message || "").trim(),
+        timestamp: timestamp || new Date().toLocaleString("fi-FI"),
       };
 
-      // Native fetch is supported in Node.js 18+
-      const response = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+      rsvps.push(newRsvp);
+      writeRSVPs(rsvps);
 
-      const result = await response.json().catch(() => ({}));
-      
-      if (!response.ok || !result.success) {
-        console.error("Web3Forms API error:", result);
-        throw new Error(result.message || `Lähetys epäonnistui (virhekoodi: ${response.status})`);
-      }
-
-      return res.json({ success: true, data: result });
+      console.log(`RSVP successfully saved to backend file for: ${name}`);
+      return res.json({ success: true, data: newRsvp });
     } catch (error: any) {
-      console.error("RSVP backend submit error:", error);
+      console.error("RSVP backend save error:", error);
       return res.status(500).json({ success: false, error: error.message || "Tapahtui sisäinen palvelinvirhe" });
     }
   });

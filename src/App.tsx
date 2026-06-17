@@ -32,10 +32,28 @@ export default function App() {
     });
   };
 
-  const [guestResponses, setGuestResponses] = useState<RSVPResponse[]>(() => {
-    const saved = localStorage.getItem('wedding_rsvp_responses');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [guestResponses, setGuestResponses] = useState<RSVPResponse[]>([]);
+
+  // Load RSVP responses from the backend server on mount (supports synchronization)
+  useEffect(() => {
+    fetch('/api/rsvps')
+      .then(res => res.json())
+      .then(result => {
+        if (result.success && Array.isArray(result.data)) {
+          setGuestResponses(result.data);
+        }
+      })
+      .catch(err => {
+        console.error("Virhe ladattaessa RSVP-vastauksia palvelimelta:", err);
+        // Fallback to local storage if server load fails
+        const saved = localStorage.getItem('wedding_rsvp_responses');
+        if (saved) {
+          try {
+            setGuestResponses(JSON.parse(saved));
+          } catch (e) {}
+        }
+      });
+  }, []);
 
   const [customImages, setCustomImages] = useState<Record<string, string>>(() => {
     const saved = localStorage.getItem('wedding_custom_images');
