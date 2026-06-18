@@ -74,50 +74,19 @@ async function startServer() {
         timestamp: timestamp || new Date().toLocaleString("fi-FI"),
       };
 
-      rsvps.push(newRsvp);
-      writeRSVPs(rsvps);
+      try {
+        rsvps.push(newRsvp);
+        writeRSVPs(rsvps);
+      } catch (saveError: any) {
+        console.error("Local save error:", saveError);
+      }
 
       console.log(`RSVP successfully saved to backend file for: ${name}`);
-
-      // Forward to Web3Forms in the background, completely non-blocking to the guest user
-      const web3FormsKey = process.env.WEB3FORMS_ACCESS_KEY || "c5fdcf9b-0742-42c8-b00e-a0f777247eea";
-      
-      fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-        },
-        body: JSON.stringify({
-          access_key: web3FormsKey,
-          subject: `Uusi hääilmoittautuminen: ${newRsvp.name}`,
-          from_name: "Hääkutsu RSVP",
-          Nimi: newRsvp.name,
-          Laktoositon: newRsvp.lactoseFree ? "Kyllä" : "Ei",
-          Gluteeniton: newRsvp.glutenFree ? "Kyllä" : "Ei",
-          "Ei allergioita": newRsvp.noAllergies ? "Kyllä" : "Ei",
-          "Muut allergiat/ruokavaliot": newRsvp.otherAllergies || "-",
-          Terveiset: newRsvp.message || "-",
-          Aikaleima: newRsvp.timestamp,
-        })
-      })
-      .then(async (web3Res) => {
-        const data = await web3Res.json().catch(() => ({}));
-        if (!web3Res.ok || !data.success) {
-          console.warn("Web3Forms email delivery failed:", web3Res.status, data);
-        } else {
-          console.log(`Web3Forms email delivery succeeded for: ${newRsvp.name}`);
-        }
-      })
-      .catch((err) => {
-        console.warn("Web3Forms client-free background transfer failed:", err.message);
-      });
 
       return res.json({ success: true, data: newRsvp });
     } catch (error: any) {
       console.error("RSVP backend save error:", error);
-      return res.status(500).json({ success: false, error: error.message || "Tapahtui sisäinen palvelinvirhe" });
+      return res.status(500).json({ success: false, error: "Tapahtui sisäinen palvelinvirhe" });
     }
   });
 

@@ -68,29 +68,62 @@ export const RSVPForm: React.FC<RSVPFormProps> = ({ onAddResponse }) => {
       timestamp: new Date().toLocaleString('fi-FI'),
     };
 
-    // Submission logic - calling our local full-stack backend
+    // Submission logic - calling our local full-stack backend and Web3Forms API
     try {
-      // 1. Save response on our local full-stack server
-      const backendResponse = await fetch('/api/rsvp', {
+      // 1. Save response on our local full-stack server backend
+      let backendSuccess = false;
+      try {
+        const backendResponse = await fetch('/api/rsvp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({
+            name: newResponse.name,
+            lactoseFree: newResponse.lactoseFree,
+            glutenFree: newResponse.glutenFree,
+            noAllergies: newResponse.noAllergies,
+            otherAllergies: newResponse.otherAllergies,
+            message: newResponse.message,
+            timestamp: newResponse.timestamp,
+          }),
+        });
+
+        const backendData = await backendResponse.json().catch(() => ({ success: false }));
+        if (backendResponse.ok && backendData.success) {
+          backendSuccess = true;
+          console.log("Recorded RSVP locally on backend database.");
+        }
+      } catch (backendErr) {
+        console.warn("Could not save to our backend file (continuing to Web3Forms anyway):", backendErr);
+      }
+
+      // 2. Submit to Web3Forms directly from the client's browser (perfectly bypasses datacenter IP blocks!)
+      const web3Response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
         body: JSON.stringify({
-          name: newResponse.name,
-          lactoseFree: newResponse.lactoseFree,
-          glutenFree: newResponse.glutenFree,
-          noAllergies: newResponse.noAllergies,
-          otherAllergies: newResponse.otherAllergies,
-          message: newResponse.message,
-          timestamp: newResponse.timestamp,
+          access_key: 'c5fdcf9b-0742-42c8-b00e-a0f777247eea',
+          subject: `Uusi hääilmoittautuminen: ${newResponse.name}`,
+          from_name: 'Hääkutsu RSVP',
+          Nimi: newResponse.name,
+          Laktoositon: newResponse.lactoseFree ? 'Kyllä' : 'Ei',
+          Gluteeniton: newResponse.glutenFree ? 'Kyllä' : 'Ei',
+          'Ei allergioita': newResponse.noAllergies ? 'Kyllä' : 'Ei',
+          'Muut allergiat/ruokavaliot': newResponse.otherAllergies || '-',
+          Terveiset: newResponse.message || '-',
+          Aikaleima: newResponse.timestamp,
         }),
       });
 
-      const backendData = await backendResponse.json().catch(() => ({ success: false, error: 'Virhe palvelimen tallennuksessa' }));
-      if (!backendResponse.ok || !backendData.success) {
-        throw new Error(backendData.error || 'Tietojen tallennus epäonnistui');
+      const web3Data = await web3Response.json().catch(() => ({}));
+      if (!web3Response.ok || !web3Data.success) {
+        console.error("Web3Forms response failed:", web3Data);
+        throw new Error(web3Data.message || 'Sähköpostilähetys epäonnistui Web3Formsin kautta');
       }
 
       // Add locally to state list for review in browser
