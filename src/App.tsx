@@ -287,8 +287,13 @@ export default function App() {
                     </p>
                   </div>
                   
-                  <div className="py-2 px-4 bg-white/50 rounded-xl border border-[#C3CFB5]/30 inline-block font-sans text-stone-850 text-xs font-bold tracking-wider select-all" id="iban-display">
-                    FI31 3939 1010 0564 95
+                  <div className="py-3 px-5 bg-white/50 rounded-xl border border-[#C3CFB5]/30 inline-flex flex-col items-center space-y-1 font-sans text-stone-850 text-xs" id="gift-info-display2">
+                    <div className="text-stone-600 text-[11px]">
+                      Saajan nimi: <span className="font-bold text-stone-800">Aino Ahola</span>
+                    </div>
+                    <div className="text-[12px] font-bold tracking-wider select-all text-stone-900" id="iban-display">
+                      FI31 3939 1010 0564 95
+                    </div>
                   </div>
 
                   <p className="font-sans text-[11px] text-stone-550 italic" id="gift-note">
