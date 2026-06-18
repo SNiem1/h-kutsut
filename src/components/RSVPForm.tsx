@@ -68,7 +68,7 @@ export const RSVPForm: React.FC<RSVPFormProps> = ({ onAddResponse }) => {
       timestamp: new Date().toLocaleString('fi-FI'),
     };
 
-    // Submission logic - calling our local full-stack backend and Web3Forms API
+    // Submission logic - calling our local full-stack backend
     try {
       // 1. Save response on our local full-stack server
       const backendResponse = await fetch('/api/rsvp', {
@@ -90,34 +90,7 @@ export const RSVPForm: React.FC<RSVPFormProps> = ({ onAddResponse }) => {
 
       const backendData = await backendResponse.json().catch(() => ({ success: false, error: 'Virhe palvelimen tallennuksessa' }));
       if (!backendResponse.ok || !backendData.success) {
-        throw new Error(backendData.error || 'Tietojen tallennus palvelimelle epäonnistui');
-      }
-
-      // 2. Submit to Web3Forms directly from the client's browser (bypasses cloud server IP blocks)
-      const web3Response = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({
-          access_key: 'c5fdcf9b-0742-42c8-b00e-a0f777247eea',
-          subject: `Uusi hääilmoittautuminen: ${newResponse.name}`,
-          from_name: 'Hääkutsu RSVP',
-          Nimi: newResponse.name,
-          Laktoositon: newResponse.lactoseFree ? 'Kyllä' : 'Ei',
-          Gluteeniton: newResponse.glutenFree ? 'Kyllä' : 'Ei',
-          'Ei allergioita': newResponse.noAllergies ? 'Kyllä' : 'Ei',
-          'Muut allergiat/ruokavaliot': newResponse.otherAllergies || '-',
-          Terveiset: newResponse.message || '-',
-          Aikaleima: newResponse.timestamp,
-        }),
-      });
-
-      const web3Data = await web3Response.json().catch(() => ({}));
-      if (!web3Response.ok || !web3Data.success) {
-        console.error("Web3Forms response failed:", web3Data);
-        throw new Error(web3Data.message || 'Web3Forms-sähköpostilähetys epäonnistui');
+        throw new Error(backendData.error || 'Tietojen tallennus epäonnistui');
       }
 
       // Add locally to state list for review in browser
